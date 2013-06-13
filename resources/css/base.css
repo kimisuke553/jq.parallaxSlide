@@ -55,8 +55,36 @@ hr {
 	margin: 10px;
 	padding: 10px;
 	background-color: #D264B7;
-	zoom: 1;
 }
 
 .title { color: rgb(255, 181, 181); }
 .price { color: rgb(179, 179, 255); }
+
+.slide {
+	margin: 0 0 20px;
+	padding: 200px 0;
+	border: 1px solid #000;
+	width: 100%;
+	background: #D264B7;
+	text-align: center;
+}
+.slide.slide2 {background: #d14fb3;}
+.slide.slide3 {background: #cf3aae;}
+
+.scrollParamArea {
+	position: fixed;
+	top: 0;
+	right: 0;
+	background: #cccccc;
+	z-index: 100;
+	text-align: right;
+}
+
+
+
+
+
+
+
+
+
