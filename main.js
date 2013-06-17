@@ -18,7 +18,7 @@
 	 * DEFAULT_OPTIONS
 	 */
 	DEFAULT_OPTIONS = {
-		parallaxScaleFactor: 2 // {number} - parallax animation‚ÌŽ‹·”{—¦
+		parallaxScaleFactor: 1.5 // {number} - parallax animationã®è¦–å·®å€çŽ‡
 	};
 
 	/**
@@ -28,10 +28,7 @@
 		var self = this;
 		self.o = $.extend({}, DEFAULT_OPTIONS, options);
 		self.$elm = $(elm);
-		// elm‚Ìposition topˆÊ’u‚ðŽæ“¾
-		self.elmPosTop = self.$elm.offset().top;
-		self.documentH = $(document).height();
-		self.windowH = $(window).height();
+		self.$elmClone = self.$elm.clone(true);
 	};
 
 	/**
@@ -40,96 +37,65 @@
 	(function (fn) {
 		fn._init = function () {
 			var self = this;
+			self._eventify();
+			self._createElement();
 			self._setCss();
 			self._refresh();
 			self._draw();
-			self._eventify();
 		};
-
-		fn._setCss = function () {
-			var self = this;
-
-			self.$elm.css({
-				position: 'relative'
-			});
-		}
 
 		fn._eventify = function () {
 			var self = this;
-
 			$(window).on('scroll', function () {
 				self._refresh();
 				self._draw();
 			});
 		};
 
+		fn._createElement = function () {
+			var self = this;
+			self.$elm.after(self.$elmClone);
+		};
+
+		fn._setCss = function () {
+			var self = this;
+			self.$elm.css({
+				opacity: 0
+			});
+			self.$elmClone.css({
+				position: 'fixed'
+				,top: self.elmPosTop
+			});
+		};
+
 		fn._refresh = function () {
 			var self = this;
-			// Œ»Ý‚ÌƒXƒNƒ[ƒ‹topˆÊ’u‚ðŽæ“¾
-			self.scrollPosTop = $(document).scrollTop();
-
-			self.calcVal = self.scrollPosTop * self.o.parallaxScaleFactor;
-
-
-			self.fixedTopVal = self.elmPosTop - self.scrollPosTop;
-
-			// $elm‚ªwindow‚Ìã‚Ü‚Å“ž’B‚·‚é‚Ü‚Å
-			if ((self.elmPosTop - self.calcVal) > self.scrollPosTop) {
-				self.$elm.css({
-					top: -(self.calcVal)
-//					,background: 'blue'
-				});
-			}
-			// Œ³‚Ì$elm‚ÌˆÊ’u‚Ü‚Å“ž’B‚µ‚½‚ç
-			else if (self.elmPosTop <= self.scrollPosTop) {
-				self.$elm.css({
-					top: 0
-//					,background: 'green'
-				});
-			} else {
-				self.$elm.css({
-					top: -(self.fixedTopVal)
-//					,background: 'yellow'
-				});
-			}
-
+			self.elmPosTop = self.$elm.offset().top; // $elmã®offset topä½ç½®
+			self.scrollPosTop = $(document).scrollTop(); // scrollä½ç½®
+			self.parallaxVal = self.scrollPosTop * self.o.parallaxScaleFactor;
+			self.elmClonePosTop = self.elmPosTop - self.parallaxVal; // $windowã‹ã‚‰è¦‹ãŸ$elmCloneã®ç›¸å¯¾ä½ç½®
 		};
 
 		fn._draw = function () {
 			var self = this;
-			if ($('.scrollParamArea').length === 0) {
-				var $paramArea = $('<div class="scrollParamArea"></div>').appendTo('body');
-				$('<div class="scroll"></div>').appendTo($paramArea);
-				$('<div class="elm-calcVal"></div>').appendTo($paramArea);
-				$('<div class="calcVal"></div>').appendTo($paramArea);
-				$('<div class="fixedTopVal"></div>').appendTo($paramArea);
-				$('<hr style="margin: 0">').appendTo($paramArea);
-
-				$('<div class="top"></div>').appendTo($paramArea);
-				$('<hr style="margin: 0">').appendTo($paramArea);
-
-				$('<div class="documentH"></div>').appendTo($paramArea);
-				$('<div class="windowH"></div>').appendTo($paramArea);
-				$('<div class="documentH_windowH"></div>').appendTo($paramArea);
-				$('<hr style="margin: 0">').appendTo($paramArea);
-
-
-
+			// $elmCloneãŒç”»é¢ä¸‹ã«ã‚ã‚‹å ´åˆ
+			if (self.elmClonePosTop > 0) {
+				self.$elmClone.css({
+					top: self.elmClonePosTop
+				});
 			}
-
-			$('.scrollParamArea .scroll').text('scrollPosTop: ' + self.scrollPosTop);
-			$('.scrollParamArea .elm-calcVal').text('elmPosTop - calcVal: ' + (self.elmPosTop - self.calcVal));
-			$('.scrollParamArea .calcVal').text('calcVal: ' + self.calcVal);
-			$('.scrollParamArea .fixedTopVal').text('fixedTopVal: ' + self.fixedTopVal);
-
-			$('.scrollParamArea .top').text('elmPosTop: ' + self.elmPosTop.toFixed(0));
-
-			$('.scrollParamArea .documentH').text('documentH: ' + self.documentH);
-			$('.scrollParamArea .windowH').text('windowH: ' + self.windowH);
-			$('.scrollParamArea .documentH_windowH').text('documentH - windowH: ' +  (self.documentH - self.windowH));
-
-
-
+			// å…ƒã®$elmã®ä½ç½®ã¾ã§åˆ°é”ã—ãŸã‚‰
+			else if (self.scrollPosTop >= self.elmPosTop) {
+				self.$elmClone.stop(true, true).css({
+					top: self.elmPosTop - self.scrollPosTop
+				});
+			}
+			// ä¸­é–“
+			else {
+				self.$elmClone.css({
+					top: 0
+				});
+			}
 		};
 	})(Module.prototype);
 
@@ -145,8 +111,6 @@
 
 	// set global
 	$[MODULE_NAME] = Module;
-
-
 
 	(function () {
 		$(document).ready(function(){
