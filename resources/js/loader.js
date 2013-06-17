@@ -21,6 +21,7 @@ var config = {
 	loaderName: 'loader.js',
 	loadFiles: [
 		'jquery.js',
+		'../../jquery.parallaxSlide.js',
 		'../../main.js'
 	]
 //==========================================================================
